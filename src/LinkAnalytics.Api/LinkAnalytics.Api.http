@@ -1,0 +1,49 @@
+@LinkAnalytics.Api_HostAddress = http://localhost:5087
+
+### Health check
+GET {{LinkAnalytics.Api_HostAddress}}/health
+Accept: application/json
+
+### OpenAPI document (Development only)
+GET {{LinkAnalytics.Api_HostAddress}}/openapi/v1.json
+Accept: application/json
+
+### Create a short link (201 Created)
+# @name createLink
+POST {{LinkAnalytics.Api_HostAddress}}/api/links
+Content-Type: application/json
+
+{
+  "url": "https://learn.microsoft.com/aspnet/core/fundamentals/minimal-apis"
+}
+
+### Get short link details (200 OK)
+GET {{LinkAnalytics.Api_HostAddress}}/api/links/{{createLink.response.body.$.code}}
+Accept: application/json
+
+### Get access statistics (200 OK, zeroed before the first access)
+GET {{LinkAnalytics.Api_HostAddress}}/api/links/{{createLink.response.body.$.code}}/stats
+Accept: application/json
+
+### Redirect to the original URL (302 Found) - records one access
+GET {{LinkAnalytics.Api_HostAddress}}/r/{{createLink.response.body.$.code}}
+
+### Get access statistics again (totalClicks increases after each redirect)
+GET {{LinkAnalytics.Api_HostAddress}}/api/links/{{createLink.response.body.$.code}}/stats
+Accept: application/json
+
+### Statistics for an unknown code (404 Not Found)
+GET {{LinkAnalytics.Api_HostAddress}}/api/links/doesnotexist/stats
+Accept: application/json
+
+### Invalid URL (400 Bad Request)
+POST {{LinkAnalytics.Api_HostAddress}}/api/links
+Content-Type: application/json
+
+{
+  "url": "ftp://example.com/file.txt"
+}
+
+### Unknown code (404 Not Found)
+GET {{LinkAnalytics.Api_HostAddress}}/api/links/doesnotexist
+Accept: application/json
